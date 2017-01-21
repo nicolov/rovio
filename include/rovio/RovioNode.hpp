@@ -117,6 +117,7 @@ class RovioNode{
   bool forcePclPublishing_;
   bool forceMarkersPublishing_;
   bool forcePatchPublishing_;
+  bool forceFramePublishing_;
   bool gotFirstMessages_;
   std::mutex m_filter_;
 
@@ -139,6 +140,7 @@ class RovioNode{
   ros::Publisher pubMarkers_;          /**<Publisher: Ros line marker, indicating the depth uncertainty of a landmark.*/
   ros::Publisher pubExtrinsics_[mtState::nCam_];
   ros::Publisher pubImuBias_;
+  ros::Publisher pubFrame_;            /**<Publisher: Image with tracked patches. */
 
   // Ros Messages
   geometry_msgs::TransformStamped transformMsg_;
@@ -149,6 +151,7 @@ class RovioNode{
   sensor_msgs::PointCloud2 patchMsg_;
   visualization_msgs::Marker markerMsg_;
   sensor_msgs::Imu imuBiasMsg_;
+  sensor_msgs::Image frameMsg_;
   int msgSeq_;
 
   // Rovio outputs and coordinate transformations
@@ -193,6 +196,7 @@ class RovioNode{
     forcePclPublishing_ = false;
     forceMarkersPublishing_ = false;
     forcePatchPublishing_ = false;
+    forceFramePublishing_ = false;
     gotFirstMessages_ = false;
 
     // Subscribe topics
@@ -212,6 +216,7 @@ class RovioNode{
     pubPcl_ = nh_.advertise<sensor_msgs::PointCloud2>("rovio/pcl", 1);
     pubPatch_ = nh_.advertise<sensor_msgs::PointCloud2>("rovio/patch", 1);
     pubMarkers_ = nh_.advertise<visualization_msgs::Marker>("rovio/markers", 1 );
+    pubFrame_ = nh_.advertise<sensor_msgs::Image>("rovio/frame", 1);
 
     pub_T_J_W_transform = nh_.advertise<geometry_msgs::TransformStamped>("rovio/T_G_W", 1);
     for(int camID=0;camID<mtState::nCam_;camID++){
@@ -946,6 +951,20 @@ class RovioNode{
           }
 
           pubPatch_.publish(patchMsg_);
+        }
+        if(pubFrame_.getNumSubscribers() > 0 || forceFramePublishing_) {
+          // Images are only drawn when doFrameVisualization is enabled: it doesn't
+          // make sense to publish otherwise.
+          unsigned int camIdx = 0; // only publish the first camera
+          if(!mpFilter_->safe_.img_[camIdx].empty() && mpImgUpdate_->doFrameVisualisation_){
+            frameMsg_.header.seq = msgSeq_;
+            frameMsg_.header.stamp = ros::Time(mpFilter_->safe_.t_);
+
+            cv_bridge::CvImage bridge = cv_bridge::CvImage(frameMsg_.header,
+              sensor_msgs::image_encodings::RGB8, mpFilter_->safe_.img_[camIdx]);
+            bridge.toImageMsg(frameMsg_);
+            pubFrame_.publish(frameMsg_);
+          }
         }
         gotFirstMessages_ = true;
       }

@@ -107,6 +107,7 @@ int main(int argc, char** argv){
   nh_private.param("record_pcl", rovioNode.forcePclPublishing_, rovioNode.forcePclPublishing_);
   nh_private.param("record_markers", rovioNode.forceMarkersPublishing_, rovioNode.forceMarkersPublishing_);
   nh_private.param("record_patch", rovioNode.forcePatchPublishing_, rovioNode.forcePatchPublishing_);
+  nh_private.param("record_frame", rovioNode.forceFramePublishing_, rovioNode.forceFramePublishing_);
   nh_private.param("reset_trigger", resetTrigger, resetTrigger);
 
   std::cout << "Recording";
@@ -117,6 +118,7 @@ int main(int argc, char** argv){
   if(rovioNode.forcePclPublishing_) std::cout << ", point cloud";
   if(rovioNode.forceMarkersPublishing_) std::cout << ", markers";
   if(rovioNode.forcePatchPublishing_) std::cout << ", patch data";
+  if(rovioNode.forceFramePublishing_) std::cout << ", frame";
   std::cout << std::endl;
 
   rosbag::Bag bagIn;
@@ -167,6 +169,7 @@ int main(int argc, char** argv){
   std::string pcl_topic_name = rovioNode.pubPcl_.getTopic();
   std::string u_rays_topic_name = rovioNode.pubMarkers_.getTopic();
   std::string patch_topic_name = rovioNode.pubPatch_.getTopic();
+  std::string frame_topic_name = rovioNode.pubFrame_.getTopic();
 
   topics.push_back(std::string(imu_topic_name));
   topics.push_back(std::string(cam0_topic_name));
@@ -202,7 +205,7 @@ int main(int argc, char** argv){
         if(rovioNode.forceImuBiasPublishing_) bagOut.write(imu_bias_topic_name,ros::Time::now(),rovioNode.imuBiasMsg_);
         if(rovioNode.forcePclPublishing_) bagOut.write(pcl_topic_name,ros::Time::now(),rovioNode.pclMsg_);
         if(rovioNode.forceMarkersPublishing_) bagOut.write(u_rays_topic_name,ros::Time::now(),rovioNode.markerMsg_);
-        if(rovioNode.forcePatchPublishing_) bagOut.write(patch_topic_name,ros::Time::now(),rovioNode.patchMsg_);
+        if(rovioNode.forcePatchPublishing_) bagOut.write(patch_topic_name,ros::Time::now(),rovioNode.patch:Msg_);
         lastSafeTime = rovioNode.mpFilter_->safe_.t_;
       }
       if(!isTriggerInitialized){
