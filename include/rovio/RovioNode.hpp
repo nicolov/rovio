@@ -46,6 +46,7 @@
 #include <std_srvs/Empty.h>
 #include <tf/transform_broadcaster.h>
 #include <visualization_msgs/Marker.h>
+#include <image_transport/image_transport.h>
 
 #include <rovio/SrvResetToPose.h>
 #include "rovio/RovioFilter.hpp"
@@ -140,7 +141,7 @@ class RovioNode{
   ros::Publisher pubMarkers_;          /**<Publisher: Ros line marker, indicating the depth uncertainty of a landmark.*/
   ros::Publisher pubExtrinsics_[mtState::nCam_];
   ros::Publisher pubImuBias_;
-  ros::Publisher pubFrame_;            /**<Publisher: Image with tracked patches. */
+  image_transport::Publisher pubFrame_;            /**<Publisher: Image with tracked patches. */
 
   // Ros Messages
   geometry_msgs::TransformStamped transformMsg_;
@@ -216,7 +217,8 @@ class RovioNode{
     pubPcl_ = nh_.advertise<sensor_msgs::PointCloud2>("rovio/pcl", 1);
     pubPatch_ = nh_.advertise<sensor_msgs::PointCloud2>("rovio/patch", 1);
     pubMarkers_ = nh_.advertise<visualization_msgs::Marker>("rovio/markers", 1 );
-    pubFrame_ = nh_.advertise<sensor_msgs::Image>("rovio/frame", 1);
+    image_transport::ImageTransport it(nh_);
+    pubFrame_ = it.advertise("rovio/frame", 1);
 
     pub_T_J_W_transform = nh_.advertise<geometry_msgs::TransformStamped>("rovio/T_G_W", 1);
     for(int camID=0;camID<mtState::nCam_;camID++){

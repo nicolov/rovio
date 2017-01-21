@@ -205,7 +205,7 @@ int main(int argc, char** argv){
         if(rovioNode.forceImuBiasPublishing_) bagOut.write(imu_bias_topic_name,ros::Time::now(),rovioNode.imuBiasMsg_);
         if(rovioNode.forcePclPublishing_) bagOut.write(pcl_topic_name,ros::Time::now(),rovioNode.pclMsg_);
         if(rovioNode.forceMarkersPublishing_) bagOut.write(u_rays_topic_name,ros::Time::now(),rovioNode.markerMsg_);
-        if(rovioNode.forcePatchPublishing_) bagOut.write(patch_topic_name,ros::Time::now(),rovioNode.patch:Msg_);
+        if(rovioNode.forcePatchPublishing_) bagOut.write(patch_topic_name,ros::Time::now(),rovioNode.patchMsg_);
         lastSafeTime = rovioNode.mpFilter_->safe_.t_;
       }
       if(!isTriggerInitialized){
